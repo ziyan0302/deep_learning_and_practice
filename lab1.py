@@ -1,3 +1,4 @@
+#%%
 #!/usr/bin/env python3
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,6 +17,8 @@ class NeuralNetwork():
         self.h2_dim = nn_h2_dim
         self.output_dim = nn_output_dim
         self.learning_rate = learning_rate
+        self.loss_a = []
+        self.n_a = []
 
 
         
@@ -51,11 +54,13 @@ class NeuralNetwork():
             labels.append(1)
         return np.array(inputs), np.array(labels).reshape(21,1)
 
-    def show(self,inputs,labels, predict):
-        predictions = []
+   
+
+    def show(self,inputs,labels):
+        pred = []
         for j in range(len(labels)):
-            predictions.append(self.predict(inputs[j]))
-            predictions = np.array(predictions)
+            pred.append(self.predict(inputs[j]))
+            predictions = np.array(pred)
         plt.subplot(1,2,1)
         plt.title('Ground Truth', fontsize=18)
         for i in range(len(labels)):
@@ -63,15 +68,36 @@ class NeuralNetwork():
                 plt.plot(inputs[i][0],inputs[i][1], 'ro')
             else:
                 plt.plot(inputs[i][0],inputs[i][1], 'bo')
-        plt.show()
         plt.subplot(1,2,2)
         plt.title('predict', fontsize=18)
         for k in range(len(labels)):
             if predictions[k] <0.5:
-                plt.plot(inputs[i][0],inputs[i][1], 'ro')
+                plt.plot(inputs[k][0],inputs[k][1], 'ro')
             else:
-                plt.plot(inputs[i][0],inputs[i][1], 'bo')
+                plt.plot(inputs[k][0],inputs[k][1], 'bo')
         plt.show()
+        # print(predictions)
+
+
+    def show_loss(self, loss_a, n_a):
+        plt.title('Loss vs Epoch', fontsize=18)
+        plt.plot(n_a,loss_a)
+        plt.show()
+
+    def show_accuracy(self, inputs, labels):
+        pred = []
+        for j in range(len(labels)):
+            pred.append(self.predict(inputs[j]))
+            predictions = np.array(pred)
+        count = 0
+        for i in range(len(labels)):
+            if labels[i] == 0:
+                predictions[i] <0.5
+                count +=1
+            if labels[i] ==1:
+                predictions[i] >0.5
+                count +=1
+        return count/len(labels)
 
 
 
@@ -81,9 +107,10 @@ class NeuralNetwork():
         z1 = 1/(1+np.exp(-u1))
         u2 = w2.dot(z1)
         z2 = 1/(1+np.exp(-u2))
-        y_pred = w3.dot(z2)
-        # print(y_pred)
+        u3 = w3.dot(z2)
+        y_pred = 1/(1+np.exp(-u3))
         return y_pred
+
 
 
 
@@ -153,10 +180,12 @@ class NeuralNetwork():
             
             
 
-            if j % 500000 == 0:
+            if j % 500 == 0:
                 print("Epoch: {} ,Loss: {}".format(j,loss))
-                print(predictions,'\n')
-                print(labels_r)
+                # print(predictions,'\n')
+                # print(labels_r)
+                self.loss_a.append(loss)
+                self.n_a.append(j)
 
 
 
@@ -176,9 +205,17 @@ class NeuralNetwork():
 
 
 if __name__ == "__main__":
-    net = NeuralNetwork(2,4,4,1,0.00001)
-    data, labels = net.generate_xor_easy()
-    net.train(data, labels,10000000)
+    learn_r_xor = 0.01
+    learn_r_linear = 0.005
+    epoch_xor = 4000
+    epoch_linear = 500
+    net = NeuralNetwork(2,4,4,1,learn_r_linear)
+    data, labels = net.generate_linear()
+
+    net.train(data, labels,epoch_linear)
+    net.show_loss(net.loss_a, net.n_a)
+    net.show(data,labels)
+    print('accuracy: {} %'.format(net.show_accuracy(data,labels)*100))
     # print(net.dy_tmp)
 
 
@@ -188,3 +225,6 @@ if __name__ == "__main__":
 
 
 
+
+
+# %%
