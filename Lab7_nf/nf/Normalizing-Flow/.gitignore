@@ -1,0 +1,4 @@
+__pycache__
+data/celeba_sample
+ckpts/
+wandb/
